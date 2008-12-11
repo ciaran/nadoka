@@ -19,6 +19,7 @@ Original Credit:
 require 'socket'
 require 'thread'
 require 'monitor'
+require "openssl"
 
 module RICE
   class Error < StandardError; end
@@ -41,7 +42,7 @@ module RICE
 
 =end
 
-    def initialize(server, port, eol = "\r\n")
+    def initialize(server, port, eol = "\r\n", ssl = false)
       @conn = []
       @conn.extend(MonitorMixin)
       @main_th = nil
@@ -49,6 +50,7 @@ module RICE
       self.server = server
       self.port   = port
       self.eol    = eol
+      self.ssl    = ssl
 
       @read_q  = Queue.new
 
@@ -81,7 +83,7 @@ module RICE
       @prev_send_time = Time.now
     end
     attr :delay, true
-    attr_reader :server, :port
+    attr_reader :server, :port, :ssl
     
 =begin
 
@@ -105,6 +107,12 @@ module RICE
       raise RuntimeError, 
         "Already connected to #{@server}:#{@port}" unless @conn.empty?
       @port = port
+    end
+
+    def ssl=(ssl)
+      raise RuntimeError, 
+        "Already connected to #{@server}:#{@port}" unless @conn.empty?
+      @ssl = !!ssl
     end
 
 =begin
@@ -163,7 +171,12 @@ module RICE
 
     def open_conn
       @conn.synchronize do
-        @conn[0] = TCPSocket.new(@server, @port)
+        conn = TCPSocket.new(@server, @port)
+        if ssl
+          conn = OpenSSL::SSL::SSLSocket.new(conn)
+          conn.connect
+        end
+        @conn[0] = conn
       end
       @conn[0].extend(MonitorMixin)
 

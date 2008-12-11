@@ -277,12 +277,13 @@ module Nadoka
           ports = si[:port] || 6667
           host  = si[:host]
           pass  = si[:pass]
+          ssl   = si[:ssl]
           if ports.respond_to? :each
             ports.each{|port|
-              svl << {:host => host, :port => port,  :pass => pass}
+              svl << {:host => host, :port => port,  :pass => pass, :ssl => ssl}
             }
           else
-            svl <<   {:host => host, :port => ports, :pass => pass}
+            svl <<   {:host => host, :port => ports, :pass => pass, :ssl => ssl}
           end
         }
         @config[:server_list] = svl

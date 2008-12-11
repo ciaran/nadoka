@@ -53,7 +53,7 @@ module Nadoka
     def next_server_info
       svinfo = @config.server_list.sort_by{rand}.shift
       @config.server_list.push svinfo
-      [svinfo[:host], svinfo[:port], svinfo[:pass]]
+      [svinfo[:host], svinfo[:port], svinfo[:pass], svinfo[:ssl]]
     end
     
     def reload_config
@@ -110,8 +110,8 @@ module Nadoka
     end
     
     def make_server
-      host, port, @server_passwd = next_server_info
-      server = ::RICE::Connection.new(host, port)
+      host, port, @server_passwd, ssl = next_server_info
+      server = ::RICE::Connection.new(host, port, "\r\n", ssl)
       server.regist{|rq, wq|
         Thread.stop
         @rq = rq
