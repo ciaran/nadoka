@@ -145,13 +145,9 @@ module Nadoka
 
     def nick_succ fail_nick
       if @try_nick
-        if @try_nick.length == fail_nick
-          @try_nick.succ!
-        else
-          @try_nick = fail_nick[0..-2] + '0'
-        end
+        @try_nick = @try_nick + '_'
       else
-        @try_nick = fail_nick + '0'
+        @try_nick = fail_nick + '_'
       end
     end
     
